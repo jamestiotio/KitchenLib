@@ -13,9 +13,12 @@ using KitchenLib.Logging;
 using KitchenLib.Logging.Exceptions;
 using System.Runtime.CompilerServices;
 using System;
+using System.Diagnostics;
 using KitchenLib.Components;
 using KitchenLib.Utils;
 using KitchenLib.Views;
+using System.IO;
+using Debug = UnityEngine.Debug;
 
 namespace KitchenLib
 {
@@ -85,6 +88,20 @@ namespace KitchenLib
 		/// <param name="mod">The mod instance.</param>
 		protected override void OnPostActivate(Mod mod)
 		{
+			string steam_api64 = Path.Combine(Application.dataPath, "Plugins", "x86_64", "steam_api64.dll");
+			if (File.Exists(steam_api64))
+			{
+				// Check if file is signed by Valve
+				FileVersionInfo info = FileVersionInfo.GetVersionInfo(steam_api64);
+
+				if (info.FileDescription == "Steam Client API" && info.CompanyName == "Valve Corporation" && info.ProductName == "Steam Client API")
+				{
+					LogInfo("------------------------------- Steam API is signed by Valve");
+				}else
+				{
+					LogWarning("------------------------------- Steam API is not signed by Valve");
+				}
+			}
 			Logger = InitLogger();
 			manager = new PreferenceManager(MOD_ID);
 			manager.RegisterPreference(new PreferenceBool("enableChangingMenu", true));
